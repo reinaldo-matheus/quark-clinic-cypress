@@ -84,12 +84,12 @@ npx cypress run --spec "cypress/e2e/01-cadastro.cy.js"
 
 ## ✅ Fluxos Automatizados
 
-| #   | Fluxo                                     | Status                |
-| --- | ----------------------------------------- | --------------------- |
-| 1   | Cadastro de Novo Usuário                  | ✅ Implementado       |
-| 2   | Login de Usuário                          | 🔄 Em desenvolvimento |
-| 3   | Agendamento de Consulta Presencial        | 🔄 Em desenvolvimento |
-| 4   | Envio de Comprovante de Pagamento (Bônus) | 🔄 Em desenvolvimento |
+| #   | Fluxo                                     | Arquivo                | Status          |
+| --- | ----------------------------------------- | ---------------------- | --------------- |
+| 1   | Cadastro de Novo Usuário                  | `01-cadastro.cy.js`    | ✅ Implementado |
+| 2   | Login de Usuário                          | `02-login.cy.js`       | ✅ Implementado |
+| 3   | Agendamento de Consulta Presencial        | `03-agendamento.cy.js` | ✅ Implementado |
+| 4   | Envio de Comprovante de Pagamento (Bônus) | `04-comprovante.cy.js` | ✅ Implementado |
 
 ---
 
@@ -99,40 +99,69 @@ npx cypress run --spec "cypress/e2e/01-cadastro.cy.js"
 
 O portal da Quark Clinic utiliza atributos `data-cy` nos elementos, que são seletores criados especificamente para testes. São mais estáveis que `class` ou `id` visto que não mudam com refatorações de estilo — seguindo a recomendação oficial do Cypress.
 
-### Por que `cy.intercept()` em vez de `cy.wait(ms)`?
+### Comando customizado `cy.loginComUsuario()`
 
-Esperas estáticas (`cy.wait(3000)`) tornam os testes lentos e instáveis (flaky). O `cy.intercept()` aguarda a resposta real da rede, garantindo que o teste avance **somente quando a aplicação estiver pronta** — independente da velocidade da conexão.
+Os fluxos 2, 3 e 4 precisam de login como pré-condição. Para evitar duplicação de código, o login foi abstraído em um comando reutilizável definido em `cypress/support/commands.js`. Isso segue o princípio DRY (Don't Repeat Yourself) e facilita a manutenção.
 
-### Por que `@faker-js/faker` para geração de dados?
+### Geração de dados dinâmicos com Faker.js
 
-O teste exige uma **nova massa de dados a cada execução** para o fluxo de cadastro. O Faker gera nome, email e telefone únicos automaticamente, evitando conflitos de um eventual usuário duplicado na API.
+O Fluxo 1 exige dados únicos a cada execução para evitar conflitos e duplicidade. A biblioteca `@faker-js/faker` gera o nome, e-mail e telefone aleatórios automaticamente em cada execução.
+
+### Seleção dinâmica de horários
+
+Os horários disponíveis na agenda usam timestamps Unix como identificadores (`data-cy="agenda-item-horario-1776438600000"`), que mudam diariamente. Para garantir que o teste funcione em qualquer dia, foi utilizado o seletor com operador `^=` (começa com):
+
+```javascript
+cy.get('[data-cy^="agenda-item-horario-"]')
+  .should("have.length.greaterThan", 0)
+  .first()
+  .click();
+```
 
 ---
 
-## 📋 Pré-condição para execução
+---
 
-O **Fluxo 2, 3 e 4** dependem de um usuário já cadastrado. Antes de rodar esses fluxos, certifique-se de que o arquivo `cypress/fixtures/usuario.json` contém credenciais válidas:
+## 📋 Pré-condição para execução dos Fluxos 2, 3 e 4
+
+Os fluxos de Login, Agendamento e Comprovante dependem de um usuário já cadastrado no sistema. Antes de rodar esses fluxos, certifique-se de que o arquivo `cypress/fixtures/usuario.json` contém credenciais válidas:
 
 ```json
 {
   "email": "seu-email-cadastrado@exemplo.com",
   "senha": "SuaSenha@123",
-  "nome": "Seu Nome"
+  "nome": "SeuNome"
 }
 ```
 
 ---
 
+## 🐛 Bugs Encontrados e Corrigidos
+
+Durante o desenvolvimento, alguns comportamentos inesperados foram encontrados e corrigidos:
+
+| Bug                                               | Causa                                                                             | Correção                                           |
+| ------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `cy.select()` falhou com valor `'M'`              | O select de Sexo usa `'MASCULINO'` em maiúsculo                                   | `cy.get('#sexo').select('MASCULINO')`              |
+| `cy.wait()` travou — nenhuma requisição capturada | URL do `cy.intercept()` não correspondia à URL real da API                        | Inspeção da aba Network para descobrir a URL real  |
+| Login não enviava requisição                      | Checkbox de Política de Privacidade é obrigatório — comportamento não documentado | Adição do `.check({ force: true })` no checkbox    |
+| Assert falhou por diferença de maiúscula          | Texto real era `'Sucesso!'` com S maiúsculo                                       | Correção do texto no `cy.contains()`               |
+| Upload falhou — arquivo não encontrado            | Arquivo salvo como `comprovante.png.jpg` pelo Windows                             | Renomeação correta para `comprovante.png`          |
+| Horário não encontrado no dia seguinte            | Timestamps nos `data-cy` mudam diariamente                                        | Uso do seletor `[data-cy^="agenda-item-horario-"]` |
+
+---
+
 ## 📄 Documentação Teórica
 
-O documento com os **Fundamentos de Testes** (Atividade 2) está disponível em:  
-📎 `docs/fundamentos-de-testes.md` _(em desenvolvimento)_
+O documento com os **Fundamentos de Testes** (Atividade 2) está disponível em:
+📎 [`docs/fundamentos-de-testes.docx`](./docs/fundamentos-de-testes.docx)
 
 Aborda:
 
-- Plano de Testes para o projeto QuarkClinic
-- Tipos de testes: Black Box, White Box e Gray Box
-- Casos de teste manuais em BDD para o fluxo de Login
+- **Plano de Testes** — o que é, importância e seções-chave aplicadas ao projeto QuarkClinic
+- **Tipos de Testes** — Black Box, White Box e Gray Box com exemplos reais do projeto
+- **Casos de Teste** em formato BDD para o fluxo de Login (positivo, negativo e borda)
+- **Lições Aprendidas** — decisões técnicas e bugs encontrados durante o desenvolvimento
 
 ---
 
