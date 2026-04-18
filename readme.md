@@ -158,10 +158,10 @@ O documento com os **Fundamentos de Testes** (Atividade 2) está disponível em:
 
 Aborda:
 
-- **Plano de Testes** — o que é, importância e seções-chave aplicadas ao projeto QuarkClinic
-- **Tipos de Testes** — Black Box, White Box e Gray Box com exemplos reais do projeto
-- **Casos de Teste** em formato BDD para o fluxo de Login (positivo, negativo e borda)
-- **Lições Aprendidas** — decisões técnicas e bugs encontrados durante o desenvolvimento
+- **Plano de Testes**: o que é, importância e seções-chave aplicadas ao projeto QuarkClinic
+- **Tipos de Testes**: Black Box, White Box e Gray Box com exemplos reais do projeto
+- **Casos de Teste**: em formato BDD para o fluxo de Login (positivo, negativo e borda)
+- **Lições Aprendidas**: decisões técnicas e bugs encontrados durante o desenvolvimento
 
 ---
 
