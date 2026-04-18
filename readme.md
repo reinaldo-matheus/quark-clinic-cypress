@@ -23,7 +23,7 @@ quark-clinic-cypress/
 │   │   ├── 01-cadastro.cy.js       # Fluxo 1: Cadastro de novo usuário
 │   │   ├── 02-login.cy.js          # Fluxo 2: Login de usuário existente
 │   │   ├── 03-agendamento.cy.js    # Fluxo 3: Agendamento de consulta presencial
-│   │   └── 04-comprovante.cy.js    # Fluxo 4 (Bônus): Envio de comprovante
+│   │   └── 04-comprovante.cy.js    # Fluxo 4: Envio de comprovante
 │   ├── fixtures/
 │   │   ├── usuario.json            # Credenciais do usuário fixo para login
 │   │   └── comprovante.png         # Imagem de comprovante para upload
